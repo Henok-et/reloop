@@ -48,7 +48,7 @@ app = FastAPI(
 # ── CORS ───────────────────────────────────────────────────────────────────────
 
 ALLOWED_ORIGINS = [
-    "https://reloop-two.vercel.app",
+    "https://reloop-flame.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
