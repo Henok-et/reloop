@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/* ── ReLoop Design System ──────────────────────────────────────────────────── */
+
+@theme {
+  --color-reloop-black: #0a0a0a;
+  --color-reloop-surface: #111111;
+  --color-reloop-surface-elevated: #1a1a1a;
+  --color-reloop-surface-hover: #1f1f1f;
+  --color-reloop-border: #2a2a2a;
+  --color-reloop-border-light: #333333;
+  --color-reloop-green: #4a7c59;
+  --color-reloop-green-light: #5a9a6a;
+  --color-reloop-green-muted: rgba(74, 124, 89, 0.15);
+  --color-reloop-text: #f0f0f0;
+  --color-reloop-text-secondary: #8a8a8a;
+  --color-reloop-text-muted: #5a5a5a;
+  --color-reloop-earth: #8b7355;
+  --color-reloop-earth-light: #a08968;
+  --color-reloop-warning: #c4953a;
+  --color-reloop-warning-muted: rgba(196, 149, 58, 0.15);
+  --color-reloop-error: #b54a4a;
+  --color-reloop-error-muted: rgba(181, 74, 74, 0.15);
+  --color-reloop-verified: #4a7c59;
+  --color-reloop-flagged: #c4953a;
+}
+
+/* ── Base Styles ───────────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-reloop-black);
+    color: var(--color-reloop-text);
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background-color: var(--color-reloop-green-muted);
+    color: var(--color-reloop-text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-reloop-green);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Reduced Motion ────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes boxReveal {
+  from {
+    opacity: 0;
+    stroke-dashoffset: 100%;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-fade-in-scale {
+    animation: fadeInScale 0.4s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-reloop-surface) 0%,
+      var(--color-reloop-surface-elevated) 50%,
+      var(--color-reloop-surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-reloop-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-reloop-border-light);
+}
