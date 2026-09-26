@@ -7,6 +7,7 @@ interface Props {
   onImageSelected: (file: File) => void;
 }
 
+/** One tap opens the picker. Drag and drop still works on desktop. */
 export default function ImageUploader({ onImageSelected }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,114 +39,73 @@ export default function ImageUploader({ onImageSelected }: Props) {
     [onImageSelected]
   );
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-
-      const file = e.dataTransfer.files?.[0];
-      if (file) validateAndSelect(file);
-    },
-    [validateAndSelect]
-  );
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) validateAndSelect(file);
-    },
-    [validateAndSelect]
-  );
+  const openPicker = () => fileInputRef.current?.click();
 
   return (
-    <div className="max-w-xl mx-auto">
-      <div className="text-center mb-6">
-        <h2 className="text-lg font-semibold text-reloop-text mb-1">Upload E-Waste Image</h2>
-        <p className="text-sm text-reloop-text-secondary">
-          Upload a photo for AI-assisted identification
-        </p>
-      </div>
-
-      {/* Drop Zone */}
+    <div className="mx-auto max-w-2xl">
       <div
         id="upload-dropzone"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => fileInputRef.current?.click()}
-        role="button"
-        tabIndex={0}
-        aria-label="Drop an image or click to browse"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            fileInputRef.current?.click();
-          }
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file) validateAndSelect(file);
         }}
-        className={`relative cursor-pointer border-2 border-dashed rounded-lg p-12 md:p-16 text-center transition-all duration-300 ${
-          isDragging
-            ? "border-reloop-green bg-reloop-green-muted"
-            : "border-reloop-border hover:border-reloop-text-muted bg-reloop-surface"
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+        }}
+        className={`flex aspect-[4/3] flex-col items-center justify-center gap-5 rounded-lg border-2 border-dashed p-8 text-center transition-colors sm:aspect-video ${
+          isDragging ? "border-reloop-green bg-reloop-green-muted" : "border-reloop-border bg-reloop-surface"
         }`}
       >
-        <div className="flex flex-col items-center gap-4">
-          <div
-            className={`w-14 h-14 rounded-xl flex items-center justify-center transition-colors duration-300 ${
-              isDragging
-                ? "bg-reloop-green/20 text-reloop-green-light"
-                : "bg-reloop-surface-elevated text-reloop-text-secondary"
-            }`}
+        <button
+          id="btn-choose-photo"
+          type="button"
+          onClick={openPicker}
+          className="inline-flex items-center gap-2.5 rounded-lg bg-reloop-green px-7 py-3.5 text-sm font-medium text-white transition-colors hover:bg-reloop-green-light"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+            aria-hidden="true"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-7 h-7"
-              aria-hidden="true"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-reloop-text mb-1">
-              {isDragging ? "Drop image here" : "Drag and drop an image"}
-            </p>
-            <p className="text-xs text-reloop-text-muted">
-              or click to browse • JPG, PNG, WebP • Max {MAX_FILE_SIZE_MB} MB
-            </p>
-          </div>
-        </div>
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          Choose a photo
+        </button>
+        <p className="text-xs text-reloop-text-muted">
+          {isDragging ? "Drop it here" : `or drop a file here · JPG, PNG, WebP · up to ${MAX_FILE_SIZE_MB} MB`}
+        </p>
 
         <input
           ref={fileInputRef}
           type="file"
           accept={ACCEPTED_FILE_TYPES}
-          onChange={handleFileChange}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) validateAndSelect(file);
+            e.target.value = "";
+          }}
           className="hidden"
           aria-label="Upload image file"
         />
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="mt-4 p-3 rounded-lg bg-reloop-error-muted border border-reloop-error/30 animate-fade-in">
+        <div className="mt-3 animate-fade-in rounded border border-reloop-error/30 bg-reloop-error-muted p-3">
           <p className="text-sm text-reloop-error">{error}</p>
         </div>
       )}

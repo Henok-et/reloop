@@ -8,6 +8,20 @@ ReLoop is an AI-assisted workflow for identifying, verifying, and routing electr
 
 ---
 
+## How the station works
+
+The scan page is a station: one photo at a time, decisions per item, and a **lot** that accumulates across photos.
+
+1. **Capture** — the camera opens directly (or a one-tap file picker). The seven classes the model knows are listed under the frame, colour-coded by handling group.
+2. **Preview** — the photo stays on screen with **Analyze** on top. Three on-device checks (sharpness, lighting, size) warn about frames that usually come back empty. They never block.
+3. **Analyze** — the photo stays visible with an elapsed-time counter and a cancel button. Inference on free-tier hosting can take up to a minute.
+4. **Review** — each detection is a proposal. For every box: **Confirm**, **Wrong class** (pick from the seven), or **Not this**. Handling guidance for that class appears on the card as soon as it is decided; there is no waiting on the other items. Scores under 70% are flagged for a closer look.
+5. **Lot** — **Next photo** adds the decided items to the lot and returns to capture. Items the model missed can be added by hand, including when nothing was found. **Close lot** shows counts by class and by handling group (refrigerant equipment vs. electronics) and offers a CSV download.
+
+The active lot lives in `localStorage`, so a reload or a trip back to the home page does not lose work. Closed lots are kept in a local history. Photos are never stored.
+
+---
+
 ## Architecture
 
 ```
@@ -54,24 +68,31 @@ ReLoop/
 │   │   │   ├── layout.tsx    # Root layout + metadata
 │   │   │   ├── page.tsx      # Landing page
 │   │   │   ├── globals.css   # Design system
+│   │   │   ├── about/
+│   │   │   │   └── page.tsx  # Dataset, classes, score, lot, limits
 │   │   │   └── scan/
 │   │   │       └── page.tsx  # Detection workspace
 │   │   ├── components/
 │   │   │   └── reloop/
-│   │   │       ├── DetectionWorkspace.tsx
-│   │   │       ├── ImageUploader.tsx
+│   │   │       ├── DetectionWorkspace.tsx  # The station: phases, decisions, lot
+│   │   │       ├── CaptureStage.tsx        # Camera/upload + class chips
 │   │   │       ├── CameraCapture.tsx
-│   │   │       ├── DetectionCanvas.tsx
-│   │   │       ├── DetectionSummary.tsx
-│   │   │       ├── VerificationPanel.tsx
-│   │   │       ├── GuidancePanel.tsx
-│   │   │       ├── RecordPanel.tsx
-│   │   │       ├── ProcessingState.tsx
-│   │   │       └── EmptyDetection.tsx
+│   │   │       ├── ImageUploader.tsx
+│   │   │       ├── PreviewStage.tsx        # Photo + frame checks + Analyze
+│   │   │       ├── ProcessingState.tsx     # Photo + elapsed time + cancel
+│   │   │       ├── DetectionCanvas.tsx     # Boxes coloured by decision/group
+│   │   │       ├── ItemCard.tsx            # Confirm / Wrong class / Not this + guidance
+│   │   │       ├── ClassPicker.tsx         # The seven classes, grouped
+│   │   │       ├── GroupTag.tsx            # Refrigerant / Electronics tag
+│   │   │       ├── EmptyDetection.tsx      # Nothing found; manual pick
+│   │   │       ├── LotStrip.tsx            # Lot id, photo no., counts
+│   │   │       └── LotSummary.tsx          # Closed lot: counts, CSV
 │   │   └── lib/
-│   │       ├── api.ts        # API client
-│   │       ├── types.ts      # TypeScript types
-│   │       └── constants.ts  # GIZ classes, guidance
+│   │       ├── api.ts           # API client (abortable)
+│   │       ├── types.ts         # TypeScript types
+│   │       ├── constants.ts     # GIZ classes, handling groups, guidance
+│   │       ├── lot.ts           # Lot persistence, summary, CSV
+│   │       └── frameQuality.ts  # On-device sharpness/lighting/size checks
 │   ├── .env.local            # API URL config
 │   ├── package.json
 │   └── tsconfig.json
@@ -131,18 +152,18 @@ The frontend will be available at `http://localhost:3000`.
 ### 5. Test Upload
 
 1. Open `http://localhost:3000`
-2. Click **Upload Image**
+2. Click **Upload a photo**, then **Choose a photo**
 3. Select an image containing e-waste (laptops, TVs, fridges, etc.)
-4. Click **Analyze Image**
-5. Verify detections, review guidance, record items
+4. Click **Analyze** on the preview
+5. Confirm, correct, or drop each proposal; guidance appears per confirmed item
+6. **Next photo** to keep adding to the lot, **Close lot** to see the summary
 
 ### 6. Test Camera
 
 1. Open `http://localhost:3000` on your phone (same network)
-2. Click **Scan with Camera**
-3. Grant camera permission
-4. Capture a photo of e-waste
-5. Complete the detection workflow
+2. Click **Open camera** and grant permission
+3. Frame one appliance and tap the shutter
+4. Continue from step 4 above
 
 ---
 

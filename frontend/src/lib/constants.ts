@@ -2,6 +2,8 @@
  * ReLoop Constants
  */
 
+import type { HandlingGroup } from "./types";
+
 // ── GIZ Official Classes ───────────────────────────────────────────────────────
 
 export const GIZ_CLASSES = [
@@ -16,16 +18,61 @@ export const GIZ_CLASSES = [
 
 export type GIZClass = (typeof GIZ_CLASSES)[number];
 
+/** Human-readable names for the model classes. */
+export const CLASS_LABELS: Record<GIZClass, string> = {
+  ACs: "Air conditioner",
+  Compressors: "Compressor",
+  Computers: "Computer",
+  Fridges: "Fridge",
+  Laptops: "Laptop",
+  Microwave: "Microwave",
+  TV: "TV",
+};
+
+export function classLabel(className: string): string {
+  return (CLASS_LABELS as Record<string, string>)[className] ?? className;
+}
+
+// ── Handling Groups (the sorting decision) ─────────────────────────────────────
+
+export const CLASS_HANDLING_GROUP: Record<GIZClass, HandlingGroup> = {
+  ACs: "refrigerant",
+  Compressors: "refrigerant",
+  Fridges: "refrigerant",
+  Computers: "electronics",
+  Laptops: "electronics",
+  Microwave: "electronics",
+  TV: "electronics",
+};
+
+export function handlingGroupFor(className: string): HandlingGroup {
+  return (CLASS_HANDLING_GROUP as Record<string, HandlingGroup>)[className] ?? "electronics";
+}
+
+export const HANDLING_GROUPS: Record<
+  HandlingGroup,
+  { label: string; short: string; sortInstruction: string }
+> = {
+  refrigerant: {
+    label: "Refrigerant equipment",
+    short: "Refrigerant",
+    sortInstruction: "Keep upright. Do not puncture. Route to controlled refrigerant recovery.",
+  },
+  electronics: {
+    label: "Electronics",
+    short: "Electronics",
+    sortInstruction: "Keep out of mixed scrap. Remove batteries where present. Route to electronics processing.",
+  },
+};
+
 // ── Workflow Steps ─────────────────────────────────────────────────────────────
 
 export const WORKFLOW_STEPS = [
-  { key: "collect", label: "Collect" },
+  { key: "capture", label: "Capture" },
   { key: "identify", label: "Identify" },
   { key: "verify", label: "Verify" },
   { key: "guide", label: "Guide" },
-  { key: "sort", label: "Sort" },
-  { key: "handover", label: "Handover" },
-  { key: "trace", label: "Trace" },
+  { key: "lot", label: "Lot" },
 ] as const;
 
 // ── Handling Guidance ──────────────────────────────────────────────────────────
@@ -103,13 +150,28 @@ export const HANDLING_GUIDANCE: Record<string, { title: string; guidance: string
   },
 };
 
+export const AI_LIMITATIONS_NOTE =
+  "AI image detection cannot determine hazardous substances, refrigerant presence, battery condition, electrical safety, or recyclability certification. Follow local regulations and safety procedures.";
+
 // ── File Upload Config ─────────────────────────────────────────────────────────
 
 export const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp";
 export const MAX_FILE_SIZE_MB = 10;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-// ── Confidence Thresholds ──────────────────────────────────────────────────────
+// ── Confidence ─────────────────────────────────────────────────────────────────
 
-export const CONFIDENCE_LOW = 0.5;
-export const CONFIDENCE_MEDIUM = 0.7;
+/**
+ * The backend only returns boxes at or above 0.50, so anything shown is at
+ * least that. Scores below REVIEW deserve a closer look before confirming.
+ */
+export const CONFIDENCE_REVIEW = 0.7;
+
+export function needsReview(confidence: number): boolean {
+  return confidence < CONFIDENCE_REVIEW;
+}
+
+// ── Timing ─────────────────────────────────────────────────────────────────────
+
+/** Shown to the worker while inference runs. Free-tier hosting is slow. */
+export const EXPECTED_ANALYSIS_SECONDS = 60;

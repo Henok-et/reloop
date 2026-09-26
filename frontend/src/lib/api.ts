@@ -9,7 +9,7 @@ const API_URL = (
   configuredApiUrl || (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "")
 ).replace(/\/+$/, "");
 
-class APIError extends Error {
+export class APIError extends Error {
   constructor(
     message: string,
     public status?: number
@@ -19,10 +19,15 @@ class APIError extends Error {
   }
 }
 
+export function isAbortError(err: unknown): boolean {
+  return err instanceof DOMException && err.name === "AbortError";
+}
+
 /**
  * Send an image to the inference API for YOLO detection.
+ * Pass an AbortSignal to let the worker cancel a slow request.
  */
-export async function predictImage(file: File): Promise<PredictionResponse> {
+export async function predictImage(file: File, signal?: AbortSignal): Promise<PredictionResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
@@ -38,10 +43,12 @@ export async function predictImage(file: File): Promise<PredictionResponse> {
     response = await fetch(`${API_URL}/predict`, {
       method: "POST",
       body: formData,
+      signal,
     });
-  } catch {
+  } catch (err) {
+    if (isAbortError(err)) throw err;
     throw new APIError(
-      "Detection service unavailable. Please check your connection and try again."
+      "Could not reach the detection service. Check your connection and try again."
     );
   }
 
@@ -59,6 +66,18 @@ export async function predictImage(file: File): Promise<PredictionResponse> {
     }
     if (response.status === 400) {
       throw new APIError(detail, 400);
+    }
+    if (response.status === 503) {
+      throw new APIError(
+        "The detection service is still starting up. Wait a minute and try again.",
+        503
+      );
+    }
+    if (response.status === 502 || response.status === 504) {
+      throw new APIError(
+        "The detection service did not answer in time. It may be waking up; try again in a minute.",
+        response.status
+      );
     }
 
     throw new APIError(detail, response.status);

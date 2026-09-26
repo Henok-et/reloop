@@ -7,7 +7,8 @@ import Link from "next/link";
 
 function ScanContent() {
   const params = useSearchParams();
-  const initialMode = params.get("mode") === "camera" ? "camera" : "upload";
+  // Camera is the default at the station; upload is for photos already taken.
+  const initialMode = params.get("mode") === "upload" ? "upload" : "camera";
 
   return (
     <main className="min-h-dvh flex flex-col bg-reloop-black">
@@ -50,7 +51,15 @@ function ScanContent() {
               <span className="text-xs font-semibold tracking-wider uppercase">ReLoop</span>
             </div>
           </Link>
-          <span className="text-xs text-reloop-text-muted">E-Waste Detection</span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/about"
+              className="text-xs text-reloop-text-secondary transition-colors hover:text-reloop-text"
+            >
+              About
+            </Link>
+            <span className="text-xs text-reloop-text-muted">Scan station</span>
+          </div>
         </div>
       </nav>
 

@@ -32,49 +32,66 @@ export interface PredictionResponse {
 export interface HealthResponse {
   status: string;
   model_loaded: boolean;
+  model_error?: string | null;
   service: string;
   version: string;
 }
 
-// ── Verification Types ─────────────────────────────────────────────────────────
+// ── Handling ───────────────────────────────────────────────────────────────────
 
-export type VerificationStatus = "ai_detected" | "worker_verified" | "corrected" | "flagged";
+/** The sorting decision a worker makes once a class is known. */
+export type HandlingGroup = "refrigerant" | "electronics";
 
-export interface VerifiedDetection extends Detection {
-  verification_status: VerificationStatus;
-  corrected_class?: string;
+// ── Review (one photo) ─────────────────────────────────────────────────────────
+
+/**
+ * A model proposal and the worker's decision on it.
+ * `open` means no decision yet. Only confirmed/corrected items enter the lot.
+ */
+export type ReviewStatus = "open" | "confirmed" | "corrected" | "rejected";
+
+export interface ReviewItem extends Detection {
+  status: ReviewStatus;
+  /** Final class after correction. Equals class_name when confirmed. */
+  final_class?: string;
 }
 
-// ── Session Record Types ───────────────────────────────────────────────────────
+// ── Lot (many photos) ──────────────────────────────────────────────────────────
 
-export interface SessionRecord {
+export type LotItemSource = "ai_confirmed" | "ai_corrected" | "manual";
+
+export interface LotItem {
   id: string;
-  session_id: string;
-  detected_class: string;
-  verified_class: string;
-  confidence: number;
-  verification_status: VerificationStatus;
-  timestamp: string;
-  image_reference: string;
+  lot_id: string;
+  /** Verified class recorded to the lot. */
+  class_name: string;
+  handling_group: HandlingGroup;
+  source: LotItemSource;
+  /** What the model proposed, if the item came from a detection. */
+  detected_class: string | null;
+  confidence: number | null;
+  photo_index: number;
+  recorded_at: string;
 }
 
-// ── Workflow ───────────────────────────────────────────────────────────────────
-
-export type WorkflowStep =
-  | "collect"
-  | "identify"
-  | "verify"
-  | "guide"
-  | "sort"
-  | "handover"
-  | "trace";
+export interface Lot {
+  id: string;
+  started_at: string;
+  closed_at: string | null;
+  photo_count: number;
+  items: LotItem[];
+  worker: string;
+  site: string;
+}
 
 // ── App State ──────────────────────────────────────────────────────────────────
 
+export type CaptureMode = "camera" | "upload";
+
 export type AppPhase =
-  | "idle"
-  | "capturing"
+  | "capture"
   | "preview"
   | "analyzing"
-  | "results"
-  | "error";
+  | "review"
+  | "error"
+  | "lot_summary";
