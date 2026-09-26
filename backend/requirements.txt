@@ -1,10 +1,13 @@
+# CPU-only PyTorch wheels. The default PyPI torch pulls ~2.5 GB of CUDA
+# libraries that are useless on Render's CPU instances and exhaust its memory.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
 python-multipart>=0.0.9
-ultralytics>=8.2.90
+ultralytics>=8.2.90,<8.4
 Pillow>=10.4.0
 numpy==1.26.4
 opencv-python-headless==4.10.0.84
-cloudpickle>=3.1.1
-nvidia-ml-py>=12.0.0
-polars>=0.20.0

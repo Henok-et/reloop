@@ -36,18 +36,34 @@ NMS_IOU_THRESHOLD = float(os.getenv("RELOOP_IOU_THRESHOLD", "0.45"))
 
 # ── App Lifecycle ──────────────────────────────────────────────────────────────
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Load the YOLO model once at startup."""
-    print("⏳ Loading ReLoop YOLO model...")
+MODEL_LOAD_ERROR: str | None = None
+
+
+def _load_model_blocking() -> None:
+    global MODEL_LOAD_ERROR
+    print("⏳ Loading ReLoop YOLO model...", flush=True)
     try:
         model.load()
-        print("✅ Model loaded successfully.")
-    except FileNotFoundError as e:
-        print(f"❌ {e}")
-        raise
+        print("✅ Model loaded successfully.", flush=True)
+    except Exception as e:  # noqa: BLE001 - surface any startup failure via /health
+        MODEL_LOAD_ERROR = str(e)
+        print(f"❌ Model load failed: {e}", flush=True)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Start loading the YOLO model in the background.
+
+    The port must be bound quickly or Render marks the deploy as timed out,
+    so the (slow) model load runs in a thread while Uvicorn starts serving.
+    /health reports model_loaded=false and /predict returns 503 until it is ready.
+    """
+    task = asyncio.create_task(asyncio.to_thread(_load_model_blocking))
     yield
-    print("🛑 Shutting down ReLoop API.")
+    if not task.done():
+        task.cancel()
+    print("🛑 Shutting down ReLoop API.", flush=True)
 
 
 app = FastAPI(
@@ -117,9 +133,11 @@ def validate_image(file: UploadFile) -> None:
 @app.get("/health")
 async def health():
     """Health check endpoint."""
+    loaded = model.model is not None
     return {
-        "status": "healthy",
-        "model_loaded": model.model is not None,
+        "status": "healthy" if loaded else ("error" if MODEL_LOAD_ERROR else "starting"),
+        "model_loaded": loaded,
+        "model_error": MODEL_LOAD_ERROR,
         "service": "ReLoop Inference API",
         "version": "1.0.0",
     }
@@ -133,6 +151,14 @@ async def predict(file: UploadFile = File(...)):
     Accepts: JPG, JPEG, PNG, WebP (max 10 MB)
     Returns: Detections with bounding boxes, confidence scores, and image dimensions.
     """
+    if model.model is None:
+        if MODEL_LOAD_ERROR:
+            raise HTTPException(status_code=500, detail=f"Model failed to load: {MODEL_LOAD_ERROR}")
+        raise HTTPException(
+            status_code=503,
+            detail="Detection model is still starting up. Please try again in a minute.",
+        )
+
     validate_image(file)
 
     # Read and check file size
