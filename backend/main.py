@@ -47,10 +47,18 @@ app = FastAPI(
 
 # ── CORS ───────────────────────────────────────────────────────────────────────
 
-ALLOWED_ORIGINS = [
+DEFAULT_ORIGINS = [
     "https://reloop-flame.vercel.app",
+    "https://reloop-two.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+]
+
+# RELOOP_CORS_ORIGINS="https://a.vercel.app,https://b.vercel.app" overrides the defaults.
+ALLOWED_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv("RELOOP_CORS_ORIGINS", ",".join(DEFAULT_ORIGINS)).split(",")
+    if origin.strip()
 ]
 
 app.add_middleware(
