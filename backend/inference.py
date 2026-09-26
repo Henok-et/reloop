@@ -38,6 +38,9 @@ class ReLoopModel:
                 f"Model file not found at {MODEL_PATH}. "
                 "Ensure ReLoop_best.pt is in the backend directory."
             )
+        import torch
+
+        torch.set_num_threads(1)
         self.model = YOLO(MODEL_PATH)
 
     def predict(

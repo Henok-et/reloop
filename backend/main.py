@@ -4,12 +4,22 @@ AI-Assisted E-Waste Detection Service
 """
 
 import os
+
+# The free Render instance has one small CPU and 512 MB of RAM.
+# Limit math libraries before PyTorch is imported so inference does not spawn
+# a thread pool large enough to run the process out of memory.
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+
+import asyncio
 import tempfile
 import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from PIL import Image, ImageOps
 
 from inference import model
 
@@ -17,6 +27,9 @@ from inference import model
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+# Longest side passed to YOLO. The model runs at 640px, and a full phone
+# photo (around 12 megapixels) gets the 512 MB instance killed mid-request.
+MAX_INFERENCE_EDGE = int(os.getenv("RELOOP_MAX_EDGE", "1280"))
 CONFIDENCE_THRESHOLD = float(os.getenv("RELOOP_CONFIDENCE", "0.50"))
 NMS_IOU_THRESHOLD = float(os.getenv("RELOOP_IOU_THRESHOLD", "0.45"))
 
@@ -72,6 +85,17 @@ app.add_middleware(
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
+def prepare_image(src_path: str, dest_path: str) -> tuple[int, int]:
+    """Apply EXIF orientation and cap the longest side before inference."""
+    with Image.open(src_path) as img:
+        img = ImageOps.exif_transpose(img)
+        img = img.convert("RGB")
+        img.thumbnail((MAX_INFERENCE_EDGE, MAX_INFERENCE_EDGE), Image.Resampling.LANCZOS)
+        width, height = img.size
+        img.save(dest_path, format="JPEG", quality=85)
+    return width, height
+
+
 def validate_image(file: UploadFile) -> None:
     """Validate uploaded file type and size."""
     if file.filename is None:
@@ -122,6 +146,7 @@ async def predict(file: UploadFile = File(...)):
     # Write to temp file for YOLO inference
     ext = os.path.splitext(file.filename or "image.jpg")[1].lower()
     tmp_path = None
+    prepared_path = None
 
     try:
         with tempfile.NamedTemporaryFile(
@@ -130,8 +155,13 @@ async def predict(file: UploadFile = File(...)):
             tmp.write(contents)
             tmp_path = tmp.name
 
-        result = model.predict(
-            tmp_path,
+        prepared_path = f"{tmp_path}.jpg"
+        width, height = prepare_image(tmp_path, prepared_path)
+        print(f"Predicting on {width}x{height} image")
+
+        result = await asyncio.to_thread(
+            model.predict,
+            prepared_path,
             confidence=CONFIDENCE_THRESHOLD,
             iou=NMS_IOU_THRESHOLD,
         )
@@ -147,9 +177,9 @@ async def predict(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
     finally:
-        # Clean up temp file
-        if tmp_path and os.path.exists(tmp_path):
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+        for path in (tmp_path, prepared_path):
+            if path and os.path.exists(path):
+                try:
+                    os.unlink(path)
+                except OSError:
+                    pass
