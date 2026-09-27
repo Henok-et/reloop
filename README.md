@@ -12,7 +12,7 @@ ReLoop is an AI-assisted workflow for identifying, verifying, and routing electr
 
 The scan page is a station: one photo at a time, decisions per item, and a **lot** that accumulates across photos.
 
-1. **Capture** — the camera opens directly (or a one-tap file picker). The seven classes the model knows are listed under the frame, colour-coded by handling group.
+1. **Capture** — the camera opens directly (or a one-tap file picker). Two sample yard photos (`frontend/public/samples/`) can be tried without an appliance at hand. The seven classes the model knows are listed under the frame, colour-coded by handling group.
 2. **Preview** — the photo stays on screen with **Analyze** on top. Three on-device checks (sharpness, lighting, size) warn about frames that usually come back empty. They never block.
 3. **Analyze** — the photo stays visible with an elapsed-time counter and a cancel button. Inference on free-tier hosting can take up to a minute.
 4. **Review** — each detection is a proposal. For every box: **Confirm**, **Wrong class** (pick from the seven), or **Not this**. Handling guidance for that class appears on the card as soon as it is decided; there is no waiting on the other items. Scores under 70% are flagged for a closer look.
@@ -73,6 +73,7 @@ ReLoop/
 │   │   │   └── scan/
 │   │   │       └── page.tsx  # Detection workspace
 │   │   ├── components/
+│   │   │   ├── landing/                    # Home page sections: nav, hero, class diagram, purpose, station entry
 │   │   │   └── reloop/
 │   │   │       ├── DetectionWorkspace.tsx  # The station: phases, decisions, lot
 │   │   │       ├── CaptureStage.tsx        # Camera/upload + class chips

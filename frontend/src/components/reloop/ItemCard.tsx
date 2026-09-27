@@ -2,15 +2,10 @@
 
 import { useState } from "react";
 import type { ReviewItem } from "@/lib/types";
-import {
-  HANDLING_GUIDANCE,
-  HANDLING_GROUPS,
-  classLabel,
-  handlingGroupFor,
-  needsReview,
-} from "@/lib/constants";
+import { classLabel, handlingGroupFor, needsReview } from "@/lib/constants";
 import ClassPicker from "./ClassPicker";
 import GroupTag from "./GroupTag";
+import HazardNote from "./HazardNote";
 
 interface Props {
   index: number;
@@ -44,7 +39,6 @@ export default function ItemCard({
   const group = handlingGroupFor(finalClass);
   const pct = Math.round(item.confidence * 100);
   const review = needsReview(item.confidence);
-  const guidance = HANDLING_GUIDANCE[finalClass];
 
   return (
     <div
@@ -75,6 +69,12 @@ export default function ItemCard({
         </div>
         <StatusBadge status={item.status} />
       </div>
+
+      {item.status !== "rejected" && !picking && (
+        <div className="px-4 pb-4" onClick={(e) => e.stopPropagation()}>
+          <HazardNote className={finalClass} />
+        </div>
+      )}
 
       {item.status === "open" && !picking && (
         <div className="grid grid-cols-3 gap-1.5 px-4 pb-4" onClick={(e) => e.stopPropagation()}>
@@ -118,23 +118,12 @@ export default function ItemCard({
         </div>
       )}
 
-      {decided && guidance && (
-        <div className="border-t border-reloop-border px-4 py-3" onClick={(e) => e.stopPropagation()}>
-          <p className={`text-xs font-medium ${group === "refrigerant" ? "text-reloop-cool-light" : "text-reloop-green-light"}`}>
-            {HANDLING_GROUPS[group].sortInstruction}
-          </p>
-          <ul className="mt-2 space-y-1">
-            {guidance.precautions.map((p) => (
-              <li key={p} className="flex items-start gap-2 text-[11px] leading-relaxed text-reloop-text-secondary">
-                <span className="mt-1.5 inline-block h-1 w-1 flex-shrink-0 rounded-full bg-reloop-text-muted" aria-hidden="true" />
-                {p}
-              </li>
-            ))}
-          </ul>
+      {decided && (
+        <div className="border-t border-reloop-border px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             onClick={onReopen}
-            className="mt-2 text-[10px] uppercase tracking-[0.18em] text-reloop-text-muted transition-colors hover:text-reloop-text-secondary"
+            className="text-[10px] uppercase tracking-[0.18em] text-reloop-text-muted transition-colors hover:text-reloop-text-secondary"
           >
             Change
           </button>

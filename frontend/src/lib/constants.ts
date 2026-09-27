@@ -77,81 +77,110 @@ export const WORKFLOW_STEPS = [
 
 // ── Handling Guidance ──────────────────────────────────────────────────────────
 
-export const HANDLING_GUIDANCE: Record<string, { title: string; guidance: string; precautions: string[] }> = {
+export const HANDLING_GUIDANCE: Record<
+  string,
+  { title: string; guidance: string; hazard: string; precautions: string[] }
+> = {
   ACs: {
     title: "Air Conditioning Units",
     guidance:
       "Handle as equipment requiring appropriate recovery and recycling procedures. Avoid unsafe dismantling or uncontrolled release of refrigerants.",
+    hazard: "Refrigerant gas and oil sealed in the circuit, plus electrical parts.",
     precautions: [
-      "May contain refrigerant gases requiring controlled recovery",
-      "Electrical components should be handled by trained personnel",
-      "Separate from mixed scrap for specialist processing",
+      "Do not puncture the pipes or the compressor",
+      "Keep the unit upright and out of heat",
+      "Electrical work and refrigerant recovery are for trained personnel",
     ],
   },
   Compressors: {
     title: "Compressors",
     guidance:
       "Handle as equipment requiring appropriate recovery and recycling procedures. Avoid unsafe dismantling or uncontrolled release of refrigerants.",
+    hazard: "Oil and residual refrigerant, sometimes still under pressure.",
     precautions: [
-      "May contain oils and refrigerant gases",
-      "Requires specialist handling for safe de-commissioning",
-      "Do not puncture or expose to heat sources",
+      "Do not puncture the shell or open it with heat",
+      "Specialist decommissioning only",
+      "Keep separate from mixed scrap",
     ],
   },
   Computers: {
     title: "Computers",
     guidance:
       "Keep electronic equipment separated from mixed scrap. Where applicable, batteries and other components should be handled according to appropriate local procedures.",
+    hazard: "Batteries, and metals on the circuit boards.",
     precautions: [
-      "May contain batteries requiring separate handling",
-      "Circuit boards may contain valuable recoverable materials",
-      "Data storage devices should be processed securely",
+      "Remove batteries where you can do so without breaking them",
+      "Do not crush or burn the unit",
+      "Data storage should be wiped or destroyed by the processor",
     ],
   },
   Fridges: {
     title: "Refrigerators",
     guidance:
       "Handle as equipment requiring appropriate recovery and recycling procedures. Avoid unsafe dismantling or uncontrolled release of refrigerants.",
+    hazard: "Refrigerant gas, and insulation foam that can hold blowing agents.",
     precautions: [
-      "Contains refrigerant gases requiring controlled recovery",
-      "Insulation may contain substances requiring specialist handling",
-      "Must remain upright during transport where possible",
+      "Do not lay it on its side",
+      "Do not cut into the back panel or the cooling pipes",
+      "Leave the insulation foam for the recovery site",
     ],
   },
   Laptops: {
     title: "Laptops",
     guidance:
       "Keep electronic equipment separated from mixed scrap. Where applicable, batteries and other components should be handled according to appropriate local procedures.",
+    hazard: "A lithium battery, and materials in the screen.",
     precautions: [
-      "Contains lithium batteries — handle with care, avoid puncturing",
-      "Screens may contain materials requiring specialist recycling",
-      "Data storage devices should be processed securely",
+      "Do not puncture, bend, or crush the battery",
+      "If the battery is swollen or leaking, set the laptop aside and do not stack it",
+      "Screens and storage devices go to specialist processing",
     ],
   },
   Microwave: {
     title: "Microwave Ovens",
     guidance:
       "Keep electronic equipment separated from mixed scrap. Internal components may require specialist handling.",
+    hazard: "A capacitor that can hold a high-voltage charge after the unit is unplugged, and a magnetron.",
     precautions: [
-      "Contains high-voltage components — do not dismantle without training",
-      "Magnetron and capacitor require specialist handling",
-      "Separate metal casing from electronic components",
+      "Do not open the case without training",
+      "Do not strike or dismantle the magnetron",
+      "Separate the metal casing from the electronic parts at a specialist site",
     ],
   },
   TV: {
     title: "Televisions",
     guidance:
       "Keep electronic equipment separated from mixed scrap. Screens and internal components may require specialist handling.",
+    hazard: "Lead in older picture-tube glass, or mercury in some flat-screen backlights.",
     precautions: [
-      "Older CRT models may contain lead and other substances",
-      "LCD/LED screens require specialist recycling",
-      "Circuit boards may contain valuable recoverable materials",
+      "Do not break the screen",
+      "Carry it upright and do not stack heavy items on it",
+      "Circuit boards and screens go to specialist recycling",
     ],
   },
 };
 
-export const AI_LIMITATIONS_NOTE =
-  "AI image detection cannot determine hazardous substances, refrigerant presence, battery condition, electrical safety, or recyclability certification. Follow local regulations and safety procedures.";
+// ── Sample Photos ──────────────────────────────────────────────────────────────
+
+/** Real yard photos served from /public so a judge can try the station without an appliance. */
+export const SAMPLE_PHOTOS = [
+  {
+    src: "/samples/yard-freezer.jpg",
+    file: "yard-freezer.jpg",
+    label: "Chest freezer in a yard",
+    note: "One item, far away, hard ground and vans behind it.",
+    width: 768,
+    height: 1024,
+  },
+  {
+    src: "/samples/ac-units.jpg",
+    file: "ac-units.jpg",
+    label: "Stacked AC units at a repair shop",
+    note: "Many items in one frame. Expect several boxes to check.",
+    width: 1024,
+    height: 576,
+  },
+] as const;
 
 // ── File Upload Config ─────────────────────────────────────────────────────────
 

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import {
-  AI_LIMITATIONS_NOTE,
   CLASS_HANDLING_GROUP,
   CLASS_LABELS,
   GIZ_CLASSES,
   HANDLING_GROUPS,
   WORKFLOW_STEPS,
 } from "@/lib/constants";
+import LandingNav from "@/components/landing/LandingNav";
+import ApplianceIcon from "@/components/landing/ApplianceIcon";
 
 const STEP_COPY = {
   capture:
@@ -35,71 +36,56 @@ const CSV_COLUMNS: { name: string; meaning: string }[] = [
   { name: "site", meaning: "Reserved. This prototype does not ask for a site, so the cell is empty." },
 ];
 
+const OBSERVATIONS = [
+  "A fridge photo was proposed as an air conditioner at 57%. Correcting it to fridge put the item in the refrigerant group and showed the upright-handling note on that card.",
+  "A photo of a person's face was proposed as a compressor, once at about 61% and once at about 70%. \u201cNot this\u201d dropped it. Nothing was recorded.",
+  "A blank frame was flagged as blurry before upload, returned no detection, and was recorded only after a class was chosen by hand.",
+  "The sample photo of stacked air conditioners at a repair shop returned eight proposals: seven between 96% and 100%, and one at 62% marked \u201ccheck closely.\u201d Each still needed a Confirm before it counted.",
+];
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <h2 className="font-plex-mono text-[11px] uppercase tracking-[0.2em] text-landing-faint">{children}</h2>;
+}
+
 export default function AboutPage() {
   const refrigerant = GIZ_CLASSES.filter((name) => CLASS_HANDLING_GROUP[name] === "refrigerant");
   const electronics = GIZ_CLASSES.filter((name) => CLASS_HANDLING_GROUP[name] === "electronics");
 
   return (
-    <main className="flex min-h-dvh flex-col">
-      <nav className="border-b border-reloop-border px-6 py-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-reloop-text">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-reloop-green">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4 text-white"
-                aria-hidden="true"
-              >
-                <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 0 1 9-9" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold uppercase tracking-wider">ReLoop</span>
-          </Link>
-          <div className="flex items-center gap-4 text-xs">
-            <Link href="/scan" className="text-reloop-text-secondary transition-colors hover:text-reloop-text">
-              Scan station
-            </Link>
-            <span className="text-reloop-text">About</span>
-          </div>
-        </div>
-      </nav>
+    <main className="flex min-h-dvh flex-col bg-landing-bg font-plex text-landing-text">
+      <LandingNav current="about" />
 
-      <article className="mx-auto w-full max-w-3xl flex-1 px-6 py-12 md:py-16">
-        <p className="mb-3 text-xs uppercase tracking-[0.2em] text-reloop-green-light">About this prototype</p>
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-reloop-text md:text-4xl">
+      <article className="mx-auto w-full max-w-3xl flex-1 px-6 py-14 md:py-20">
+        <p className="font-plex-mono text-[11px] uppercase tracking-[0.2em] text-landing-faint">About this prototype</p>
+        <h1 className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl">
           A worker decides. The lot is the record.
         </h1>
-        <p className="mb-10 text-base leading-relaxed text-reloop-text-secondary">
+        <p className="mt-6 text-base leading-relaxed text-landing-dim md:text-lg">
           ReLoop is a station for electronic waste. A camera proposes one of seven classes. The person at the
           station confirms, corrects, or rejects that proposal. Confirmed items build into a lot. Closing the lot
-          produces a count of refrigerant equipment and electronics, plus a CSV. A model label is not a record
-          until a person accepts it.
+          produces a count of refrigerant equipment and electronics, plus a CSV.
         </p>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">How a lot is built</h2>
-          <ol className="space-y-3">
+        <section className="mt-14">
+          <SectionLabel>How a lot is built</SectionLabel>
+          <ol className="mt-6 space-y-5">
             {WORKFLOW_STEPS.map((step, index) => (
-              <li key={step.key} className="flex gap-3">
-                <span className="mt-0.5 w-5 shrink-0 font-mono text-xs text-reloop-text-muted">{index + 1}</span>
+              <li key={step.key} className="grid grid-cols-[2rem_1fr] gap-3">
+                <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-landing-border-strong font-plex-mono text-[11px] text-landing-dim">
+                  {index + 1}
+                </span>
                 <div>
-                  <p className="text-sm font-medium text-reloop-text">{step.label}</p>
-                  <p className="text-sm leading-relaxed text-reloop-text-secondary">{STEP_COPY[step.key]}</p>
+                  <p className="font-display text-base font-medium">{step.label}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-landing-dim">{STEP_COPY[step.key]}</p>
                 </div>
               </li>
             ))}
           </ol>
         </section>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">The data and the model</h2>
-          <div className="space-y-3 text-sm leading-relaxed text-reloop-text-secondary">
+        <section className="mt-14">
+          <SectionLabel>The data and the model</SectionLabel>
+          <div className="mt-5 space-y-3 text-sm leading-relaxed text-landing-dim md:text-base">
             <p>
               The weights in this prototype were trained in a Kaggle notebook. Training used two datasets published
               on Hugging Face, and a further collection of more than 4,000 images. Those extra images were unlabeled
@@ -107,39 +93,41 @@ export default function AboutPage() {
             </p>
             <p>
               The model that ships here is a small YOLO detector. It can name seven classes and nothing else. Mixed
-              scrap is not one of them. It draws a box and a score. It does not decide the record.
-            </p>
-            <p>
-              No held-out accuracy, precision, or recall is published with this prototype. A score on screen is not
-              a measured accuracy for the class.
+              scrap is not one of them. It draws a box and a score.
             </p>
           </div>
         </section>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">Seven classes, two groups</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-reloop-cool/30 bg-reloop-cool-muted p-4">
-              <p className="text-sm font-medium text-reloop-cool-light">{HANDLING_GROUPS.refrigerant.label}</p>
-              <p className="mt-1 text-sm leading-relaxed text-reloop-text-secondary">
+        <section className="mt-14">
+          <SectionLabel>Seven classes, two groups</SectionLabel>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-landing-border bg-landing-panel p-5">
+              <span className="inline-flex rounded-full bg-landing-blue-tag px-2.5 py-1 font-plex-mono text-[10px] font-medium uppercase tracking-[0.16em] text-landing-blue-tag-text">
+                {HANDLING_GROUPS.refrigerant.short}
+              </span>
+              <p className="mt-3 text-sm leading-relaxed text-landing-dim">
                 {HANDLING_GROUPS.refrigerant.sortInstruction}
               </p>
-              <ul className="mt-3 space-y-1">
+              <ul className="mt-4 space-y-2">
                 {refrigerant.map((name) => (
-                  <li key={name} className="text-sm text-reloop-text">
+                  <li key={name} className="flex items-center gap-2.5 text-sm">
+                    <ApplianceIcon name={name} className="h-5 w-5 text-landing-blue" />
                     {CLASS_LABELS[name]}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg border border-reloop-green/30 bg-reloop-green-muted p-4">
-              <p className="text-sm font-medium text-reloop-green-light">{HANDLING_GROUPS.electronics.label}</p>
-              <p className="mt-1 text-sm leading-relaxed text-reloop-text-secondary">
+            <div className="rounded-xl border border-landing-border bg-landing-panel p-5">
+              <span className="inline-flex rounded-full bg-landing-green-tag px-2.5 py-1 font-plex-mono text-[10px] font-medium uppercase tracking-[0.16em] text-landing-green-tag-text">
+                {HANDLING_GROUPS.electronics.short}
+              </span>
+              <p className="mt-3 text-sm leading-relaxed text-landing-dim">
                 {HANDLING_GROUPS.electronics.sortInstruction}
               </p>
-              <ul className="mt-3 space-y-1">
+              <ul className="mt-4 space-y-2">
                 {electronics.map((name) => (
-                  <li key={name} className="text-sm text-reloop-text">
+                  <li key={name} className="flex items-center gap-2.5 text-sm">
+                    <ApplianceIcon name={name} className="h-5 w-5 text-landing-green" />
                     {CLASS_LABELS[name]}
                   </li>
                 ))}
@@ -148,32 +136,25 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">What a score means</h2>
-          <div className="space-y-3 text-sm leading-relaxed text-reloop-text-secondary">
+        <section className="mt-14">
+          <SectionLabel>What a score means</SectionLabel>
+          <div className="mt-5 space-y-3 text-sm leading-relaxed text-landing-dim md:text-base">
             <p>
-              The service returns a box only when the score is 50% or higher. A score under 70% is marked “check
-              closely” so the worker looks again before confirming.
+              The service returns a box only when the score is 50% or higher. A score under 70% is marked
+              &ldquo;check closely&rdquo; so the worker looks again before confirming.
             </p>
             <p>
               The number is how much that region resembles one of the seven classes compared with the other six. It
               is not a probability that the photo contains e-waste. There is no background class, so a photo of a
-              person, a room, or an empty frame can still receive a class and a high score. That is why “Not this”
-              exists, and why a rejected box is never written into the lot.
+              person, a room, or an empty frame can still receive a class and a high score. That is why &ldquo;Not
+              this&rdquo; exists, and why a rejected box is never written into the lot.
             </p>
           </div>
         </section>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">What a photo cannot prove</h2>
-          <p className="rounded-lg border border-reloop-warning/30 bg-reloop-warning-muted px-4 py-3 text-sm leading-relaxed text-reloop-text-secondary">
-            {AI_LIMITATIONS_NOTE}
-          </p>
-        </section>
-
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">The record</h2>
-          <div className="mb-4 space-y-3 text-sm leading-relaxed text-reloop-text-secondary">
+        <section className="mt-14">
+          <SectionLabel>The record</SectionLabel>
+          <div className="mt-5 space-y-3 text-sm leading-relaxed text-landing-dim md:text-base">
             <p>
               Only confirmed and corrected items enter the lot. An item the model missed can be added by choosing a
               class by hand. The open lot stays in this browser if the page is reloaded. Photos are not stored.
@@ -182,35 +163,29 @@ export default function AboutPage() {
             </p>
             <p>Closing a lot downloads a CSV. Each row is one item.</p>
           </div>
-          <dl className="divide-y divide-reloop-border overflow-hidden rounded-lg border border-reloop-border">
+          <dl className="mt-5 divide-y divide-landing-border overflow-hidden rounded-xl border border-landing-border bg-landing-panel">
             {CSV_COLUMNS.map((column) => (
-              <div key={column.name} className="grid gap-1 px-4 py-3 sm:grid-cols-[9rem_1fr] sm:gap-4">
-                <dt className="font-mono text-xs text-reloop-green-light">{column.name}</dt>
-                <dd className="text-sm text-reloop-text-secondary">{column.meaning}</dd>
+              <div key={column.name} className="grid gap-1 px-5 py-3 sm:grid-cols-[9rem_1fr] sm:gap-4">
+                <dt className="font-plex-mono text-xs text-landing-green">{column.name}</dt>
+                <dd className="text-sm text-landing-dim">{column.meaning}</dd>
               </div>
             ))}
           </dl>
         </section>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xs uppercase tracking-widest text-reloop-text-muted">What we observed</h2>
-          <ul className="space-y-3 text-sm leading-relaxed text-reloop-text-secondary">
-            <li>
-              A fridge photo was proposed as an air conditioner at 57%. Correcting it to fridge put the item in the
-              refrigerant group and showed the upright-handling note on that card.
-            </li>
-            <li>
-              A photo of a person’s face was proposed as a compressor, once at about 61% and once at about 70%.
-              “Not this” dropped it. Nothing was recorded.
-            </li>
-            <li>
-              A blank frame was flagged as blurry before upload, returned no detection, and was recorded only after
-              a class was chosen by hand.
-            </li>
+        <section className="mt-14">
+          <SectionLabel>What we observed</SectionLabel>
+          <ul className="mt-5 space-y-4">
+            {OBSERVATIONS.map((text, index) => (
+              <li key={index} className="grid grid-cols-[2rem_1fr] gap-3 text-sm leading-relaxed text-landing-dim">
+                <span className="font-plex-mono text-landing-green">0{index + 1}</span>
+                <span>{text}</span>
+              </li>
+            ))}
           </ul>
         </section>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="mt-14 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/scan?mode=camera"
             className="inline-flex items-center justify-center rounded-lg bg-reloop-green px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-reloop-green-light"
@@ -219,18 +194,17 @@ export default function AboutPage() {
           </Link>
           <Link
             href="/scan?mode=upload"
-            className="inline-flex items-center justify-center rounded-lg border border-reloop-border bg-reloop-surface-elevated px-6 py-3 text-sm font-medium text-reloop-text transition-colors hover:bg-reloop-surface-hover"
+            className="inline-flex items-center justify-center rounded-lg border border-landing-border-strong px-6 py-3 text-sm font-medium transition-colors hover:border-landing-dim hover:bg-landing-panel"
           >
             Upload a photo
           </Link>
         </div>
       </article>
 
-      <footer className="border-t border-reloop-border px-6 py-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-between text-xs text-reloop-text-muted">
-          <span>ReLoop Phase 1</span>
-          <span>Photos are not stored</span>
-        </div>
+      <footer className="border-t border-landing-border px-6 py-5">
+        <p className="mx-auto max-w-3xl font-plex-mono text-[11px] uppercase tracking-[0.16em] text-landing-faint">
+          ReLoop · phase 1 prototype · photos are not stored
+        </p>
       </footer>
     </main>
   );

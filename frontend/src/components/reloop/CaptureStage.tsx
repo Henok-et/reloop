@@ -4,6 +4,7 @@ import type { CaptureMode } from "@/lib/types";
 import { GIZ_CLASSES, CLASS_LABELS, CLASS_HANDLING_GROUP } from "@/lib/constants";
 import CameraCapture from "./CameraCapture";
 import ImageUploader from "./ImageUploader";
+import SamplePhotos from "./SamplePhotos";
 
 interface Props {
   mode: CaptureMode;
@@ -38,6 +39,8 @@ export default function CaptureStage({ mode, onModeChange, onImage, onAddManuall
             {mode === "camera" ? "Upload a photo instead" : "Use the camera instead"}
           </button>
         </div>
+
+        <SamplePhotos onImage={onImage} />
 
         <div>
           <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-reloop-text-muted">Recognises</p>

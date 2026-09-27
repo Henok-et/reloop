@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { landingFontClass } from "@/components/landing/fonts";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,22 +10,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ReLoop — AI-Assisted E-Waste Tracking & Circular Guidance",
+  title: "ReLoop — E-waste station",
   description:
-    "Identify, verify and route electronic waste with AI-assisted visual detection. Built on the official GIZ E-Waste Database.",
-  keywords: [
-    "e-waste",
-    "recycling",
-    "YOLO",
-    "AI detection",
-    "circular economy",
-    "GIZ",
-    "electronic waste",
-  ],
+    "A camera proposes one of seven appliance classes, a worker confirms, corrects, or rejects it, and confirmed items build a lot with counts by handling group. Trained on public e-waste image sets.",
+  keywords: ["e-waste", "recycling", "YOLO", "object detection", "circular economy", "electronic waste", "Ghana"],
   authors: [{ name: "ReLoop" }],
   openGraph: {
-    title: "ReLoop — AI-Assisted E-Waste Tracking",
-    description: "Identify, verify and route electronic waste with AI-assisted visual detection.",
+    title: "ReLoop — Every appliance gets a second opinion",
+    description:
+      "A camera proposes, a worker decides, and a closed lot gives counts of refrigerant equipment and electronics.",
     type: "website",
   },
 };
@@ -35,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${landingFontClass}`}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

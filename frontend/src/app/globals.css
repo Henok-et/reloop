@@ -27,6 +27,28 @@
   --color-reloop-cool: #4a7c9c;
   --color-reloop-cool-light: #6a9fc0;
   --color-reloop-cool-muted: rgba(74, 124, 156, 0.18);
+
+  /* Landing page palette. Scoped by name; the station keeps the reloop-* tokens. */
+  --color-landing-bg: #0a0b0a;
+  --color-landing-panel: #14171a;
+  --color-landing-panel-2: #191c17;
+  --color-landing-border: #262a24;
+  --color-landing-border-strong: #33372f;
+  --color-landing-text: #f2f2ed;
+  --color-landing-dim: #9c9c94;
+  --color-landing-faint: #6b6b63;
+  --color-landing-green: #5b9169;
+  --color-landing-green-tag: #173404;
+  --color-landing-green-tag-text: #c0dd97;
+  --color-landing-blue: #5b7a9e;
+  --color-landing-blue-tag: #042c53;
+  --color-landing-blue-tag-text: #b5d4f4;
+  --color-landing-amber: #d9a441;
+
+  /* Landing fonts. The variables are set by next/font on the landing wrapper. */
+  --font-display: var(--font-space-grotesk), "Inter", system-ui, sans-serif;
+  --font-plex: var(--font-ibm-plex-sans), "Inter", system-ui, sans-serif;
+  --font-plex-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 }
 
 /* ── Base Styles ───────────────────────────────────────────────────────────── */

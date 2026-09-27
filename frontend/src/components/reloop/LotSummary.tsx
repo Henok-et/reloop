@@ -1,7 +1,7 @@
 "use client";
 
 import type { Lot } from "@/lib/types";
-import { AI_LIMITATIONS_NOTE, HANDLING_GROUPS } from "@/lib/constants";
+import { HANDLING_GROUPS } from "@/lib/constants";
 import { lotToCsv, summarizeLot } from "@/lib/lot";
 import GroupTag from "./GroupTag";
 
@@ -112,8 +112,6 @@ export default function LotSummary({ lot, onStartNewLot }: Props) {
           Start new lot
         </button>
       </div>
-
-      <p className="text-[10px] leading-relaxed text-reloop-text-muted">{AI_LIMITATIONS_NOTE}</p>
     </div>
   );
 }
