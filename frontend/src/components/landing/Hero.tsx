@@ -1,9 +1,23 @@
 import ClassDiagram from "./ClassDiagram";
+import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="px-6 pt-14 pb-16 md:pt-20 md:pb-24">
-      <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-center">
+    <section className="relative isolate overflow-hidden px-6 pt-14 pb-16 md:pt-20 md:pb-24">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <Image
+          src="/recycle-mark.png"
+          alt=""
+          width={800}
+          height={800}
+          priority
+          className="absolute top-1/2 right-[-8%] h-[130%] w-auto max-w-none -translate-y-1/2 opacity-40 md:right-[6%] md:h-[150%]"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(243,246,242,0.96)_0%,rgba(243,246,242,0.82)_46%,rgba(243,246,242,0.45)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-landing-bg/50 via-transparent to-landing-bg" />
+      </div>
+
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-center">
         <div>
           <p className="font-plex-mono text-[11px] uppercase tracking-[0.2em] text-landing-faint">
             E-waste station · phase 1

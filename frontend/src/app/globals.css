@@ -3,47 +3,47 @@
 /* ── ReLoop Design System ──────────────────────────────────────────────────── */
 
 @theme {
-  --color-reloop-black: #0a0a0a;
-  --color-reloop-surface: #111111;
-  --color-reloop-surface-elevated: #1a1a1a;
-  --color-reloop-surface-hover: #1f1f1f;
-  --color-reloop-border: #2a2a2a;
-  --color-reloop-border-light: #333333;
-  --color-reloop-green: #4a7c59;
-  --color-reloop-green-light: #5a9a6a;
-  --color-reloop-green-muted: rgba(74, 124, 89, 0.15);
-  --color-reloop-text: #f0f0f0;
-  --color-reloop-text-secondary: #8a8a8a;
-  --color-reloop-text-muted: #5a5a5a;
-  --color-reloop-earth: #8b7355;
-  --color-reloop-earth-light: #a08968;
-  --color-reloop-warning: #c4953a;
-  --color-reloop-warning-muted: rgba(196, 149, 58, 0.15);
-  --color-reloop-error: #b54a4a;
-  --color-reloop-error-muted: rgba(181, 74, 74, 0.15);
-  --color-reloop-verified: #4a7c59;
-  --color-reloop-flagged: #c4953a;
+  --color-reloop-black: #f3f6f2;
+  --color-reloop-surface: #ffffff;
+  --color-reloop-surface-elevated: #f7f9f6;
+  --color-reloop-surface-hover: #eef2ec;
+  --color-reloop-border: #d5dcd3;
+  --color-reloop-border-light: #c2cbc0;
+  --color-reloop-green: #3e6b4c;
+  --color-reloop-green-light: #2f5c3e;
+  --color-reloop-green-muted: rgba(62, 107, 76, 0.12);
+  --color-reloop-text: #1c2420;
+  --color-reloop-text-secondary: #4e5852;
+  --color-reloop-text-muted: #5e6962;
+  --color-reloop-earth: #6e5a3e;
+  --color-reloop-earth-light: #8a7354;
+  --color-reloop-warning: #8a5a10;
+  --color-reloop-warning-muted: rgba(138, 90, 16, 0.12);
+  --color-reloop-error: #9b3a3a;
+  --color-reloop-error-muted: rgba(155, 58, 58, 0.1);
+  --color-reloop-verified: #3e6b4c;
+  --color-reloop-flagged: #8a5a10;
   /* Handling groups: refrigerant equipment is cool blue, electronics is green */
-  --color-reloop-cool: #4a7c9c;
-  --color-reloop-cool-light: #6a9fc0;
-  --color-reloop-cool-muted: rgba(74, 124, 156, 0.18);
+  --color-reloop-cool: #2c6180;
+  --color-reloop-cool-light: #245a78;
+  --color-reloop-cool-muted: rgba(44, 97, 128, 0.12);
 
-  /* Landing page palette. Scoped by name; the station keeps the reloop-* tokens. */
-  --color-landing-bg: #0a0b0a;
-  --color-landing-panel: #14171a;
-  --color-landing-panel-2: #191c17;
-  --color-landing-border: #262a24;
-  --color-landing-border-strong: #33372f;
-  --color-landing-text: #f2f2ed;
-  --color-landing-dim: #9c9c94;
-  --color-landing-faint: #6b6b63;
-  --color-landing-green: #5b9169;
-  --color-landing-green-tag: #173404;
-  --color-landing-green-tag-text: #c0dd97;
-  --color-landing-blue: #5b7a9e;
-  --color-landing-blue-tag: #042c53;
-  --color-landing-blue-tag-text: #b5d4f4;
-  --color-landing-amber: #d9a441;
+  /* Landing page palette. Same light paper as the station. */
+  --color-landing-bg: #f3f6f2;
+  --color-landing-panel: #ffffff;
+  --color-landing-panel-2: #f7f9f6;
+  --color-landing-border: #d5dcd3;
+  --color-landing-border-strong: #c2cbc0;
+  --color-landing-text: #1c2420;
+  --color-landing-dim: #4e5852;
+  --color-landing-faint: #5e6962;
+  --color-landing-green: #3e6b4c;
+  --color-landing-green-tag: #e5f2e4;
+  --color-landing-green-tag-text: #245c34;
+  --color-landing-blue: #2c6180;
+  --color-landing-blue-tag: #e4f0f8;
+  --color-landing-blue-tag-text: #1e4e72;
+  --color-landing-amber: #8a5a10;
 
   /* Landing fonts. The variables are set by next/font on the landing wrapper. */
   --font-display: var(--font-space-grotesk), "Inter", system-ui, sans-serif;
@@ -229,10 +229,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-reloop-border);
+  background: #c2cbc0;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-reloop-border-light);
+  background: #a8b2a6;
 }
