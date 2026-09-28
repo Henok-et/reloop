@@ -74,6 +74,35 @@ export interface LotItem {
   recorded_at: string;
 }
 
+/** Where the worker expects a recovered material or component to go. Empty until they choose. */
+export type RecoveryDestination = "repair" | "reuse" | "recycler" | "controlled_disposal";
+
+/**
+ * Worker-entered material assumption for one verified class.
+ * Quantity and value are derived from the verified count, not stored.
+ */
+export interface MaterialRecoveryInput {
+  id: string;
+  category: string;
+  materialName: string;
+  kgPerItem: number;
+  pricePerKg: number;
+  destination: RecoveryDestination | "";
+}
+
+/**
+ * Worker-entered reusable component for one verified class.
+ * Value is derived from quantity and value per unit, not stored.
+ */
+export interface ReusableComponentInput {
+  id: string;
+  category: string;
+  componentName: string;
+  quantity: number;
+  valuePerUnit: number;
+  destination: RecoveryDestination | "";
+}
+
 export interface Lot {
   id: string;
   started_at: string;
@@ -82,6 +111,9 @@ export interface Lot {
   items: LotItem[];
   worker: string;
   site: string;
+  /** Inputs only. Totals are calculated when the screen or CSV is drawn. */
+  materials: MaterialRecoveryInput[];
+  components: ReusableComponentInput[];
 }
 
 // ── App State ──────────────────────────────────────────────────────────────────

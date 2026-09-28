@@ -160,6 +160,123 @@ export const HANDLING_GUIDANCE: Record<
   },
 };
 
+// ── Hazardous Parts ────────────────────────────────────────────────────────────
+
+export interface HazardousPart {
+  /** Component name as the worker would list it. */
+  name: string;
+  /** What makes it hazardous. Wording stays "may": a photo cannot prove it. */
+  hazard: string;
+  /** How to take care of it once it is out of the unit. */
+  care: string;
+}
+
+/**
+ * Parts a worker should expect to find in each class that need separate care.
+ * Lithium batteries and oils are the ones most often thrown in with scrap.
+ */
+export const HAZARDOUS_PARTS: Record<string, HazardousPart[]> = {
+  ACs: [
+    {
+      name: "Refrigerant",
+      hazard: "Gas under pressure in the sealed circuit.",
+      care: "Do not cut the pipes. Trained staff recover it with equipment before dismantling.",
+    },
+    {
+      name: "Compressor oil",
+      hazard: "Oil that may carry refrigerant residue.",
+      care: "Drain into a sealed, labelled container. Never onto soil or into a drain.",
+    },
+    {
+      name: "Capacitor",
+      hazard: "Can hold an electric charge after the unit is unplugged.",
+      care: "A trained person discharges it before anyone handles the board.",
+    },
+  ],
+  Compressors: [
+    {
+      name: "Compressor oil",
+      hazard: "Oil that may carry refrigerant residue.",
+      care: "Drain into a sealed, labelled container. Never onto soil or into a drain.",
+    },
+    {
+      name: "Residual refrigerant",
+      hazard: "Gas that may still be under pressure inside the shell.",
+      care: "Do not open the shell with heat or force. Vent only through recovery equipment.",
+    },
+  ],
+  Computers: [
+    {
+      name: "Lithium coin cell",
+      hazard: "Lithium battery on the mainboard. Fire risk if crushed or shorted.",
+      care: "Remove whole, tape the contacts, keep dry, and route to battery collection.",
+    },
+    {
+      name: "Power supply capacitor",
+      hazard: "Can hold an electric charge after the unit is unplugged.",
+      care: "Leave the power supply closed unless trained to discharge it.",
+    },
+  ],
+  Fridges: [
+    {
+      name: "Refrigerant",
+      hazard: "Gas under pressure in the cooling pipes.",
+      care: "Do not cut the pipes or the back panel. Recover with equipment before dismantling.",
+    },
+    {
+      name: "Compressor oil",
+      hazard: "Oil that may carry refrigerant residue.",
+      care: "Drain into a sealed, labelled container. Never onto soil or into a drain.",
+    },
+    {
+      name: "Insulation foam",
+      hazard: "May hold blowing agents that escape when the foam is cut.",
+      care: "Leave the foam intact for the recovery site.",
+    },
+  ],
+  Laptops: [
+    {
+      name: "Lithium-ion battery",
+      hazard: "Fire risk if punctured, bent, crushed, or short-circuited.",
+      care: "Remove whole, tape the terminals, keep dry and away from metal scrap. Swollen or leaking packs go in sand or a metal box, and on to battery collection.",
+    },
+    {
+      name: "Screen backlight",
+      hazard: "Older screens may contain mercury lamps.",
+      care: "Do not break the screen. Keep it whole for specialist processing.",
+    },
+  ],
+  Microwave: [
+    {
+      name: "High-voltage capacitor",
+      hazard: "Can hold a dangerous charge long after the unit is unplugged.",
+      care: "Only a trained person opens the case and discharges it.",
+    },
+    {
+      name: "Magnetron",
+      hazard: "Ceramic insulators may contain beryllium oxide, which is toxic as dust.",
+      care: "Do not break, grind, or strike it. Hand it over whole.",
+    },
+  ],
+  TV: [
+    {
+      name: "Picture tube glass",
+      hazard: "Older tube TVs hold lead in the glass.",
+      care: "Do not break the tube. Carry upright and route to specialist recycling.",
+    },
+    {
+      name: "Screen backlight",
+      hazard: "Some flat screens contain mercury lamps.",
+      care: "Do not break the panel. Keep it whole for specialist processing.",
+    },
+    {
+      name: "Capacitor",
+      hazard: "Can hold an electric charge after the unit is unplugged.",
+      care: "A trained person discharges it before the board is handled.",
+    },
+  ],
+};
+
 // ── Sample Photos ──────────────────────────────────────────────────────────────
 
 /** Real yard photos served from /public so a judge can try the station without an appliance. */

@@ -3,7 +3,9 @@
 import type { Lot } from "@/lib/types";
 import { HANDLING_GROUPS } from "@/lib/constants";
 import { lotToCsv, summarizeLot } from "@/lib/lot";
+import { countsFromNames } from "@/lib/recovery";
 import GroupTag from "./GroupTag";
+import RecoveryValue from "./RecoveryValue";
 
 interface Props {
   lot: Lot;
@@ -92,6 +94,15 @@ export default function LotSummary({ lot, onStartNewLot }: Props) {
           </p>
         )}
       </div>
+
+      {summary.total > 0 && (
+        <RecoveryValue
+          counts={countsFromNames(lot.items.map((item) => item.class_name))}
+          materials={lot.materials ?? []}
+          components={lot.components ?? []}
+          readOnly
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-2">
         <button

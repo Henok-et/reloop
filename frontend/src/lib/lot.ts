@@ -7,8 +7,9 @@
  */
 
 import { useMemo, useSyncExternalStore } from "react";
-import type { HandlingGroup, Lot, LotItem, LotItemSource } from "./types";
+import type { HandlingGroup, Lot, LotItem, LotItemSource, MaterialRecoveryInput, ReusableComponentInput } from "./types";
 import { HANDLING_GROUPS, classLabel, handlingGroupFor } from "./constants";
+import { computeRecovery, countsFromNames, destinationLabel, formatPlainQuantity } from "./recovery";
 
 const ACTIVE_KEY = "reloop_active_lot";
 const HISTORY_KEY = "reloop_lots";
@@ -43,11 +44,21 @@ function readActiveRaw(): string | null {
   }
 }
 
+function asRecordList<T>(value: unknown): T[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item) => item && typeof item === "object") as T[];
+}
+
 function parseLot(raw: string | null): Lot | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as Lot;
-    return parsed && Array.isArray(parsed.items) ? parsed : null;
+    if (!parsed || !Array.isArray(parsed.items)) return null;
+    return {
+      ...parsed,
+      materials: asRecordList<MaterialRecoveryInput>(parsed.materials),
+      components: asRecordList<ReusableComponentInput>(parsed.components),
+    };
   } catch {
     return null;
   }
@@ -81,6 +92,8 @@ export function newLot(): Lot {
     items: [],
     worker: "",
     site: "",
+    materials: [],
+    components: [],
   };
 }
 
@@ -223,5 +236,72 @@ export function lotToCsv(lot: Lot): string {
       .map(csvCell)
       .join(",")
   );
-  return [header.join(","), ...rows].join("\n");
+
+  const itemCsv = [header.join(","), ...rows].join("\n");
+  const recovery = computeRecovery(
+    countsFromNames(lot.items.map((item) => item.class_name)),
+    lot.materials ?? [],
+    lot.components ?? []
+  );
+  if (recovery.materials.length === 0 && recovery.components.length === 0) return itemCsv;
+
+  const recoveryHeader = [
+    "type",
+    "category",
+    "name",
+    "kg_per_item",
+    "price_per_kg_ghs",
+    "verified_item_quantity",
+    "total_kg",
+    "component_quantity",
+    "value_per_unit_ghs",
+    "estimated_value_ghs",
+    "destination",
+  ];
+  const materialRows = recovery.materials.map((line) =>
+    [
+      "material",
+      line.category,
+      line.materialName,
+      formatPlainQuantity(line.kgPerItem),
+      line.pricePerKg.toFixed(2),
+      formatPlainQuantity(line.itemQuantity),
+      formatPlainQuantity(line.totalKg),
+      "",
+      "",
+      line.estimatedValue.toFixed(2),
+      destinationLabel(line.destination),
+    ]
+      .map(csvCell)
+      .join(",")
+  );
+  const componentRows = recovery.components.map((line) =>
+    [
+      "component",
+      line.category,
+      line.componentName,
+      "",
+      "",
+      "",
+      "",
+      formatPlainQuantity(line.quantity),
+      line.valuePerUnit.toFixed(2),
+      line.estimatedValue.toFixed(2),
+      destinationLabel(line.destination),
+    ]
+      .map(csvCell)
+      .join(",")
+  );
+
+  return [
+    itemCsv,
+    "",
+    "recovery_estimate",
+    csvCell(
+      "Worker-entered estimates. AI detection does not determine material composition or monetary value."
+    ),
+    recoveryHeader.join(","),
+    ...materialRows,
+    ...componentRows,
+  ].join("\n");
 }

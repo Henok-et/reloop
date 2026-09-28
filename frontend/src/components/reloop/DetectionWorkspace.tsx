@@ -1,10 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { AppPhase, CaptureMode, Lot, LotItem, PredictionResponse, ReviewItem } from "@/lib/types";
+import type {
+  AppPhase,
+  CaptureMode,
+  Lot,
+  LotItem,
+  MaterialRecoveryInput,
+  PredictionResponse,
+  ReusableComponentInput,
+  ReviewItem,
+} from "@/lib/types";
 import { isAbortError, predictImage } from "@/lib/api";
 import { classLabel, needsReview } from "@/lib/constants";
-import { closeLot, makeLotItem, newLot, saveActiveLot, useStoredActiveLot } from "@/lib/lot";
+import { closeLot, loadActiveLot, makeLotItem, newLot, saveActiveLot, useStoredActiveLot } from "@/lib/lot";
+import { countsFromNames } from "@/lib/recovery";
 import CaptureStage from "./CaptureStage";
 import PreviewStage from "./PreviewStage";
 import ProcessingState from "./ProcessingState";
@@ -14,6 +24,7 @@ import EmptyDetection from "./EmptyDetection";
 import LotStrip from "./LotStrip";
 import LotSummary from "./LotSummary";
 import ClassPicker from "./ClassPicker";
+import RecoveryValue from "./RecoveryValue";
 
 interface Props {
   initialMode: CaptureMode;
@@ -53,8 +64,6 @@ export default function DetectionWorkspace({ initialMode }: Props) {
   const updateLot = useCallback((next: Lot) => {
     saveActiveLot(next);
   }, []);
-
-  const photoIndex = (lot?.photo_count ?? 0) + 1;
 
   // ── Photo lifecycle ──────────────────────────────────────────────────────────
 
@@ -157,11 +166,13 @@ export default function DetectionWorkspace({ initialMode }: Props) {
   // ── Committing to the lot ────────────────────────────────────────────────────
 
   const commitCurrentPhoto = useCallback((): Lot | null => {
-    if (!lot) return null;
-    if (!result) return lot;
+    const current = loadActiveLot();
+    if (!current) return null;
+    if (!result) return current;
 
+    const photoIndex = current.photo_count + 1;
     const newItems: LotItem[] = decidedItems.map((it) =>
-      makeLotItem(lot, photoIndex, {
+      makeLotItem(current, photoIndex, {
         class_name: it.final_class || it.class_name,
         source: it.status === "corrected" ? "ai_corrected" : "ai_confirmed",
         detected_class: it.class_name,
@@ -170,13 +181,13 @@ export default function DetectionWorkspace({ initialMode }: Props) {
     );
 
     const next: Lot = {
-      ...lot,
-      photo_count: lot.photo_count + 1,
-      items: [...lot.items, ...newItems],
+      ...current,
+      photo_count: photoIndex,
+      items: [...current.items, ...newItems],
     };
-    updateLot(next);
+    saveActiveLot(next);
     return next;
-  }, [decidedItems, lot, photoIndex, result, updateLot]);
+  }, [decidedItems, result]);
 
   const handleNextPhoto = useCallback(() => {
     commitCurrentPhoto();
@@ -185,33 +196,44 @@ export default function DetectionWorkspace({ initialMode }: Props) {
 
   const handleManualAdd = useCallback(
     (cls: string, countsAsPhoto: boolean) => {
-      if (!lot) return;
-      const item = makeLotItem(lot, countsAsPhoto ? photoIndex : lot.photo_count, {
+      const current = loadActiveLot();
+      if (!current) return;
+      const photoIndex = countsAsPhoto ? current.photo_count + 1 : current.photo_count;
+      const item = makeLotItem(current, photoIndex, {
         class_name: cls,
         source: "manual",
         detected_class: null,
         confidence: null,
       });
-      updateLot({
-        ...lot,
-        photo_count: countsAsPhoto ? lot.photo_count + 1 : lot.photo_count,
-        items: [...lot.items, item],
+      saveActiveLot({
+        ...current,
+        photo_count: countsAsPhoto ? photoIndex : current.photo_count,
+        items: [...current.items, item],
       });
       setLastAdded(classLabel(cls));
       setManualPickOpen(false);
       if (countsAsPhoto) backToCapture();
     },
-    [backToCapture, lot, photoIndex, updateLot]
+    [backToCapture]
   );
 
   const handleCloseLot = useCallback(() => {
-    const current = phase === "review" ? commitCurrentPhoto() : lot;
+    const current = phase === "review" ? commitCurrentPhoto() : loadActiveLot();
     if (!current) return;
     const closed = closeLot(current);
     setClosedLot(closed);
     clearPhoto();
     setPhase("lot_summary");
-  }, [clearPhoto, commitCurrentPhoto, lot, phase]);
+  }, [clearPhoto, commitCurrentPhoto, phase]);
+
+  const handleRecoveryChange = useCallback(
+    (materials: MaterialRecoveryInput[], components: ReusableComponentInput[]) => {
+      const current = loadActiveLot();
+      if (!current) return;
+      saveActiveLot({ ...current, materials, components });
+    },
+    []
+  );
 
   const handleStartNewLot = useCallback(() => {
     const fresh = newLot();
@@ -236,6 +258,14 @@ export default function DetectionWorkspace({ initialMode }: Props) {
   }, [items]);
 
   const lowScoreCount = items.filter((it) => it.status === "open" && needsReview(it.confidence)).length;
+
+  const recordedNames = useMemo(() => (lot?.items ?? []).map((item) => item.class_name), [lot]);
+  const pendingNames = useMemo(
+    () => (phase === "review" ? decidedItems.map((item) => item.final_class || item.class_name) : []),
+    [decidedItems, phase]
+  );
+  const recoveryCounts = useMemo(() => countsFromNames(recordedNames, pendingNames), [pendingNames, recordedNames]);
+  const showRecovery = recoveryCounts.length > 0 && phase !== "analyzing";
 
   if (phase === "lot_summary" && closedLot) {
     return (
@@ -395,6 +425,17 @@ export default function DetectionWorkspace({ initialMode }: Props) {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {showRecovery && (
+        <div className="mt-6">
+          <RecoveryValue
+            counts={recoveryCounts}
+            materials={lot.materials}
+            components={lot.components}
+            onChange={handleRecoveryChange}
+          />
         </div>
       )}
 
